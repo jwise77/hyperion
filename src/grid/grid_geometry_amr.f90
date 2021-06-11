@@ -187,7 +187,7 @@ contains
     real(dp) :: r
     r = mod(abs(x1 - x2), dx)
     if(r > 0.5_dp * dx) r = dx - r
-    aligned = abs(r / dx) < 1.e-8
+    aligned = abs(r / dx) < 1.e-6
   end function aligned
 
   subroutine setup_grid_geometry(group)
@@ -256,15 +256,16 @@ contains
              call error("setup_grid_geometry", trim(message))
           end if
           if(.not.aligned(grid%xmin, grid_ref%xmin, grid_ref%width(1))) then
-             write(message, '("Grids ", I0, " and ", I0, " in level ", I0, " have edges that are not separated by an integer number of cells in the x direction")') 1, igrid, ilevel
+
+            write(message, '("Grids ", I0, " and ", I0, " in level ", I0, " have edges that are not separated by an integer number of cells in the x direction")') 1, igrid, ilevel
              call error("setup_grid_geometry", trim(message))
           end if
           if(.not.aligned(grid%ymin, grid_ref%ymin, grid_ref%width(2))) then
-             write(message, '("Grids ", I0, " and ", I0, " in level ", I0, " have edges that are not separated by an integer number of cells in the y direction")') 1, igrid, ilevel
+            write(message, '("Grids ", I0, " and ", I0, " in level ", I0, " have edges that are not separated by an integer number of cells in the y direction")') 1, igrid, ilevel
              call error("setup_grid_geometry", trim(message))
           end if
           if(.not.aligned(grid%zmin, grid_ref%zmin, grid_ref%width(3))) then
-             write(message, '("Grids ", I0, " and ", I0, " in level ", I0, " have edges that are not separated by an integer number of cells in the z direction")') 1, igrid, ilevel
+            write(message, '("Grids ", I0, " and ", I0, " in level ", I0, " have edges that are not separated by an integer number of cells in the z direction")') 1, igrid, ilevel
              call error("setup_grid_geometry", trim(message))
           end if
        end do
