@@ -22,12 +22,12 @@ from . import Model
 
 def _min_none(*args):
     "Minimum of several arguments, ignoring None values"
-    return min(x for x in args if x is not None)
+    return min(x for x in args if x != None)
 
 
 def _max_none(*args):
     "Maximum of several arguments, ignoring None values"
-    return max(x for x in args if x is not None)
+    return max(x for x in args if x != None)
 
 
 class Star(FreezableClass):
@@ -68,7 +68,7 @@ class Star(FreezableClass):
         "Return the total luminosity of the star, including accretion"
         ltot = 0.
         for source in self.sources:
-            if self.sources[source].luminosity is not None:
+            if self.sources[source].luminosity != None:
                 ltot += self.sources[source].luminosity
         return ltot
 
@@ -89,8 +89,8 @@ class Star(FreezableClass):
         # Retrieve all the spectra for the sources of emission
         nu_all, fnu_all = [], []
         for source in self.sources:
-            if self.sources[source].temperature is not None:
-                if bnu_range is None:
+            if self.sources[source].temperature != None:
+                if bnu_range == None:
                     raise ValueError("bnu_range is needed for sources with Planck spectra")
                 nu, fnu = self.sources[source].get_spectrum(nu_range=bnu_range)
             else:
@@ -268,7 +268,7 @@ class AnalyticalYSOModel(Model):
         exists = False
 
         for disk in self.disks:
-            if disk is reference_disk:
+            if disk == reference_disk:
                 logger.warning("Reference disk already exists, not re-adding")
                 exists = True
 
@@ -373,7 +373,7 @@ class AnalyticalYSOModel(Model):
 
         for i, disk in enumerate(self.disks):
             if disk.mass > 0.:
-                if disk.dust is None:
+                if disk.dust == None:
                     raise Exception("Disk %i dust not set" % i)
                 nu_min = disk.dust.optical_properties.nu[0]
                 nu_max = disk.dust.optical_properties.nu[-1]
@@ -384,7 +384,7 @@ class AnalyticalYSOModel(Model):
 
         for i, envelope in enumerate(self.envelopes):
             if envelope.exists():
-                if envelope.dust is None:
+                if envelope.dust == None:
                     raise Exception("envelope %i dust not set" % i)
                 nu_min = envelope.dust.optical_properties.nu[0]
                 nu_max = envelope.dust.optical_properties.nu[-1]
@@ -489,19 +489,19 @@ class AnalyticalYSOModel(Model):
     def _set_polar_grid_auto(self, n1=None, n2=None, n3=None, grid_type=None,
                              zmin=None, zmax=None, rmin=None, rmax=None, min_spacing=1.e-8):
 
-        if self.star.radius is None:
+        if self.star.radius == None:
             raise Exception("The central source radius need to be defined "
                             "before the grid can be set up")
 
-        if grid_type is 'spherical':
+        if grid_type == 'spherical':
             n_r, n_theta, n_phi = n1, n2, n3
-        elif grid_type is 'cylindrical':
+        elif grid_type == 'cylindrical':
             n_r, n_z, n_phi = n1, n2, n3
         else:
             raise Exception("Unknown grid type: %s" % grid_type)
 
         # Find minimum and maximum radius if not specified
-        if rmin is None:
+        if rmin == None:
             if len(self.disks) == 0 and len(self.envelopes) == 0:
                 rmin = self.star.radius
             else:
@@ -510,7 +510,7 @@ class AnalyticalYSOModel(Model):
                                [ambient.rmin for ambient in self.ambients])
                 rmin = _min_none(*rmin_values)
 
-        if rmax is None:
+        if rmax == None:
             rmax_values = [2. * self.star.radius]
             rmax_values += ([disk.rmax for disk in self.disks] +
                             [envelope.rmax for envelope in self.envelopes] +
@@ -572,25 +572,25 @@ class AnalyticalYSOModel(Model):
         r_wall = np.hstack([0., np.logspace(np.log10(rnext / rmin), np.log10((rmax - rmin) / rmin), n_r - 1)]) * rmin + rmin
         r_wall = np.hstack([0., r_wall])
 
-        if grid_type is 'spherical':
+        if grid_type == 'spherical':
 
             # THETA WALLS
             t_wall = np.linspace(0, pi, n_theta + 1)
             t_wall = t_wall + np.sin(2 * t_wall) / 6.
 
-        elif grid_type is 'cylindrical':
+        elif grid_type == 'cylindrical':
 
             # Z WALLS
 
             if not zmax:
                 zmax = rmax
 
-            if zmin is None and len(self.disks) > 0:
+            if zmin == None and len(self.disks) > 0:
                 zmin = np.inf
                 for disk in self.disks:
                     zmin = min(zmin, disk.scale_height_at(rmin))
 
-            if zmin is not None:
+            if zmin != None:
 
                 if n_z % 2 == 0:
                     n_zn = n_z // 2
@@ -616,7 +616,7 @@ class AnalyticalYSOModel(Model):
         # PHI WALLS
         p_wall = np.linspace(0., 2. * pi, n_phi + 1)
 
-        if grid_type is 'spherical':
+        if grid_type == 'spherical':
             return SphericalPolarGrid(r_wall, t_wall, p_wall)
         else:
             return CylindricalPolarGrid(r_wall, z_wall, p_wall)
@@ -652,7 +652,7 @@ class AnalyticalYSOModel(Model):
         # For convenience
         lstar = self.star.sources['star'].luminosity
 
-        if self.star.mass is None:
+        if self.star.mass == None:
             raise Exception("Stellar mass is not set")
 
         # Find the luminosity dissipated in the shock
@@ -700,7 +700,7 @@ class AnalyticalYSOModel(Model):
             Whether to merge density arrays that have the same dust type
         '''
 
-        if self.grid is None:
+        if self.grid == None:
             raise Exception("The coordinate grid needs to be defined")
 
         # Initialize new Model instance
@@ -762,7 +762,7 @@ class AnalyticalYSOModel(Model):
                 m.add_density_grid(envelope.density(m.grid), envelope.dust,
                                    merge_if_possible=merge_if_possible)
 
-                if envelope.cavity is not None:
+                if envelope.cavity != None:
                     if envelope.cavity.theta_0 == 0.:
                         logger.warning("Cavity opening angle is zero, "
                                     "ignoring density contribution")
